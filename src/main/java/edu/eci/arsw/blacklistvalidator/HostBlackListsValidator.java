@@ -4,6 +4,7 @@ import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
 import edu.eci.arsw.threads.BlackListThread;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 
 /**
@@ -49,9 +50,8 @@ public class HostBlackListsValidator {
       for(Integer j : i.getBlackListOcurrences()){
         ocu.add(j);
       }
-      checked+= i.getCheckedListsCount();
-      ocurrences+= i.getOcurrences();
-      
+      checked += i.getCheckedListsCountTwo();
+      ocurrences += i.getOcurrencesCountTwo();
       if (ocurrences >= BlackListThread.BLACK_LIST_ALARM_COUNT) {
 
         skds.reportAsNotTrustworthy(ipaddress);

@@ -5,6 +5,7 @@
  */
 package edu.eci.arsw.threads;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 // import edu.eci.arsw.blacklistvalidator.*;
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
 
@@ -21,12 +22,15 @@ public class BlackListThread extends Thread{
   int inicioLista;
   int finLista;
   LinkedList<Integer> blackListOcurrences = new LinkedList<>();
-  int ocurrencesCount = 0;
-  int checkedListsCount = 0;
+  private int ocurrencesCount = 0;
+  private int checkedListsCount = 0;
+  private final Object lock = new Object();
   public static HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
   public static final int BLACK_LIST_ALARM_COUNT = 5;
+  private final AtomicInteger ocurrencesCountTwo = new AtomicInteger();
+  private final AtomicInteger checkedListsCountTwo = new AtomicInteger();
 
-  /**
+  /**w
    * Constructor de la clase, la cual nos permitirá tener lo necesario para crear los hilos y que funcione adecuadamente el método run.
    * @param inicioLista - int, Contiene el valor inicial desde donde empezaremos a revisar el segmento de lista.
    * @param finLista - int, Contiene el valor final hasta donde podremos revisar el segmento de lista.
@@ -36,6 +40,14 @@ public class BlackListThread extends Thread{
     this.inicioLista = inicioLista;
     this.finLista = finLista;
     this.ipaddress= ipaddress;
+  }
+
+  public int getOcurrencesCountTwo() {
+    return ocurrencesCountTwo.get();
+  }
+
+  public int getCheckedListsCountTwo() {
+    return checkedListsCountTwo.get();
   }
 
   /**
@@ -94,15 +106,40 @@ public class BlackListThread extends Thread{
     return ocurrencesCount;
   }
 
-  @Override
-  public void run(){
+  private void validarHost(){
     for (int i = inicioLista; i < finLista  && ocurrencesCount < BLACK_LIST_ALARM_COUNT; i++) {
-      
-      checkedListsCount++;
+      //incrementarConteoListas();
+      IncrementarListas();
       if (skds.isInBlackListServer(i, ipaddress)) {
+//        synchronized (this) {
+//          blackListOcurrences.add(i);
+//          ocurrencesCount++;
+//        }
         blackListOcurrences.add(i);
-        ocurrencesCount++;
+        IncrementarOcurrencias();
       }
     }
+  }
+
+  private void incrementarConteoListas(){
+    synchronized (lock) {
+      checkedListsCount++;
+      //System.out.println("Listas revisadas: " + checkedListsCount);
+    }
+  }
+
+  private void IncrementarListas(){
+    checkedListsCountTwo.getAndIncrement();
+//    System.out.println(getCheckedListsCountTwo());
+  }
+
+  private void IncrementarOcurrencias(){
+    ocurrencesCountTwo.getAndIncrement();
+//    System.out.println(getOcurrencesCountTwo());
+  }
+
+  @Override
+  public void run(){
+    validarHost();
   }
 }

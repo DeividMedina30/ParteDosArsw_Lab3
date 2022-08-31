@@ -23,6 +23,6 @@ public class Main {
     System.out.println("The host was found in the following blacklists:"+totalBlackListOcurrences);
     System.out.println(Runtime.getRuntime().availableProcessors()); //Devuelve el número de procesadores disponibles para la máquina virtual Java.
     long endTime = System.currentTimeMillis();
-    System.out.println(endTime - startTime);
+    System.out.println("Tiempo ejecución:" + (endTime - startTime));
   }
 }
